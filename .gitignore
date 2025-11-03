@@ -60,6 +60,8 @@ __pycache__/
 *.cert
 *.p12
 
+*.md
+
 # Project specific
 .turbo/
 .cache/

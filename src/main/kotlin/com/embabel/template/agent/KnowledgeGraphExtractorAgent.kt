@@ -1,3 +1,4 @@
+
 /*
  * Copyright 2024-2025 Embabel Software, Inc.
  *
@@ -13,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.embabel.template.dataharvesteragent
+package com.embabel.template.agent
 
 import com.embabel.agent.api.annotation.AchievesGoal
 import com.embabel.agent.api.annotation.Action
@@ -21,16 +22,14 @@ import com.embabel.agent.api.annotation.Agent
 import com.embabel.agent.api.common.OperationContext
 import com.embabel.agent.domain.io.UserInput
 import com.embabel.agent.domain.library.HasContent
-import com.embabel.common.core.types.Timestamped
+import com.embabel.template.service.KnowledgeGraphService
 import org.springframework.context.annotation.Profile
-
 import org.slf4j.LoggerFactory
-import java.time.Instant
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 import java.time.LocalDateTime
+import java.util.UUID
 
-val article1 = Node.Article(
+val article1 = Article(
+    id = UUID.randomUUID().toString(),
     title = "Villa signing Rashford loses three sponsorship deals",
     URL = "https://www.tribalfootball.com/article/soccer-premier-league-villa-signing-rashford-loses-three-sponsorship-deals-6d925766-53e5-42b5-a1e2-357f9159d385",
     content = """
@@ -53,7 +52,8 @@ val article1 = Node.Article(
     sentiment = "negative"
 )
 
-val article2 = Node.Article(
+val article2 = Article(
+    id = UUID.randomUUID().toString(),
     title = "Manchester United’s Marcus Rashford Faces Disciplinary Action for Night Out Amidst Illness Controversy",
     URL = "https://www.tribalfootball.com/article/manchester-uniteds-marcus-rashford-faces-disciplinary-action-for-night-out-amidst-illness-controversy", // assumed source URL format
     content = """
@@ -76,7 +76,8 @@ val article2 = Node.Article(
     sentiment = "negative"
 )
 
-val article3 = Node.Article(
+val article3 = Article(
+    id = UUID.randomUUID().toString(),
     title = "Another huge scandal, Marcus Rashford will pay for this after his indiscipline",
     URL = "https://www.elfutbolero.com/soccer/another-huge-scandal-marcus-rashford-will-pay-for-this-after-his-indiscipline-20240129", // inferred plausible source URL
     content = """
@@ -99,86 +100,69 @@ val article3 = Node.Article(
     sentiment = "negative"
 )
 
+val articles = listOf(article1, article2, article3)
+
+data class ArticleNum(
+    val number: Int,
+)
+
+
 sealed interface FormattedVerificationResult : HasContent {
 }
 
-data class ExtractedNodes(
-    val article: Node.Article,
-    val people: List<Node.Person>,
-    val organisations: List<Node.Organisation>,
-    val knowledge_points: List<Node.Knowledge>,
-    val locations: List<Node.Location>,
-    val events: List<Node.Event>,
-)
-
-data class ExtractedResult(
-    val extracted_nodes: ExtractedNodes
-) : FormattedVerificationResult {
-
-    override val content: String
-        get() = """
-            # Article
-            
-            ${extracted_nodes.article.title}
-            ${extracted_nodes.article.content}
-            
-            # People
-            
-            ${extracted_nodes.people.joinToString("\n")}
-            
-            # Organisations
-            
-            ${extracted_nodes.organisations.joinToString("\n")}
-            
-            # Knowledge
-            
-            ${extracted_nodes.knowledge_points.joinToString("\n")}
-            
-            # Locations
-            
-            ${extracted_nodes.locations.joinToString("\n")}
-            
-            # Events
-            
-            ${extracted_nodes.events.joinToString("\n")}
-            
-        """.trimIndent()
-}
-
 @Agent(
-    description = "Extracts knowledge graph nodes and relationships from a ",
+    description = "Extracts knowledge graph nodes and relationships from an article.",
 )
 @Profile("!test")
-class DataHarvesterAgent() {
-    private val logger = LoggerFactory.getLogger(DataHarvesterAgent::class.java)
+class KnowledgeGraphExtractorAgent(private val knowledgeGraphService: KnowledgeGraphService) {
+    private val logger = LoggerFactory.getLogger(KnowledgeGraphExtractorAgent::class.java)
 
     @Action
-    fun createKnowledgeGraph(userInput: UserInput, context: OperationContext): ExtractedNodes {
+    fun getArticle(userInput: UserInput, context: OperationContext): Article {
+        val article_num = context.ai()
+            .withLlm("granite4:micro-h")
+            .createObject("Take this user input:${userInput} and tell me what number article the user wants to test",
+                ArticleNum::class.java)
+        if (article_num.number in (1..3)){
+            return articles[article_num.number - 1]
+        }
+        else{
+            return article1
+        }
+
+    }
+
+    @Action
+    fun createKnowledgeGraph(article: Article, context: OperationContext): ExtractedNodes {
         val prompt = """You are an intelligent information extraction model designed to populate a football knowledge graph.
         
         ### ARTICLE
-        Title: ${article1.title}
-        Content: ${article1.content}
+        Title: ${article.title}
+        Content: ${article.content}
         
         ### OBJECTIVE
-        From the given article text, identify all people mentioned, all facts, all locations and all events and extract any information that you can find about them.
+        From the given article text, identify all people mentioned, all knowledge_points, all organisations, all locations and all events and extract any information that you can find about them.
         
         every person json MUST have the property node_type = "person"
         every organisation json MUST have the property node_type = "organisation"
         every knowledge_point json MUST have the property node_type = "knowledge"
         every locations json MUST have the property node_type = "locations"
         every event json MUST have the property node_type = "event"
+        every node MUST have a unique ID string
         
-        all people
+        
+        YOU MUST generate a set of relationships that join the nodes with evidence from the article.
         """.trimIndent()
         return context.ai()
             .withDefaultLlm()
             .createObject(prompt, ExtractedNodes::class.java)
     }
 
-    @AchievesGoal(description = "Nodes and relationships have been extracted from article")
-    @Action(description = "Extracts a knowledge graph")
+    @AchievesGoal(description = "Nodes and relationships have been extracted from the article and saved to the knowledge graph")
+    @Action(description = "Extracts a knowledge graph and saves it to Neo4j")
     fun goal(extracted_nodes: ExtractedNodes): ExtractedResult {
+        knowledgeGraphService.saveExtractedData(extracted_nodes)
+        logger.info("Successfully saved extracted nodes and relationships to Neo4j.")
         return ExtractedResult(extracted_nodes)
     }
 
