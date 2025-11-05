@@ -1,122 +1,128 @@
 
 package com.embabel.template.agent
 
-import com.embabel.agent.domain.library.HasContent
+import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.LocalTime
 
-data class Person(
+data class PersonNode(
     val id: String,
-    val first_name: String? = null,
-    val surname: String? = null,
-    val other_names: List<String>? = null,
-//    val dob: LocalDateTime,
+    val name: String,
+    val nicknames: List<String>? = null,
+    val dob: LocalDate? = null,
     val nationalities: List<String>? = null,
     val height: Int? = null, // in cm
     val weight: Int? = null, // in kg
-    val sex: String? = null,
+    val gender: String? = null,
     val occupations: List<String>? = null,
-    )
+)
 
-data class Organisation(
+data class OrganisationNode(
     val id: String,
-    val node_type: String = "organisation",
-    val name: String? = null,
+    val name: String,
+    val dateFounded: LocalDate? = null,
     val description: String? = null,
-    val date_founded: LocalDateTime? = null,
-    )
+)
 
-data class Article(
+data class ArticleNode(
     val id: String,
-    val node_type: String = "article",
-    val title: String? = null,
-    val URL: String? = null,
-    val content: String? = null,
-    val language: String? = null,
-    val summary: String? = null,
-    val publish_datetime: LocalDateTime? = null,
-    val scrape_datetime: LocalDateTime? = null,
-    val sentiment: String? = null,
-    )
+    val title: String,
+    val url: String?,
+    val content: String,
+    val language: String?,
+    val summary: String?,
+    val publishDateTime: LocalDateTime?,
+    val scrapeDateTime: LocalDateTime?,
+    val agentProcessId: String?,
+    val sentiment: String?,
+)
 
-data class Knowledge(
+data class KnowledgeNode(
     val id: String,
-    val node_type: String = "knowledge",
-    val topic: String? = null,
-    val fact: String? = null,
-    )
+    val fact: String,
+    val category: String? = null,
+    val dateOfFact: LocalDate? = null
+)
 
-data class Location(
+data class LocationNode(
     val id: String,
-    val node_type: String = "location",
-    val name: String? = null,
-    val description: String? = null,
-    val number: Int? = null,
+    val name: String,
+    val number: String? = null,
     val street: String? = null,
     val city: String? = null,
     val country: String? = null,
-    )
+    val latitude: Double? = null,
+    val longitude: Double? = null,
+)
 
-data class Event(
+data class EventNode(
     val id: String,
-    val node_type: String = "event",
-    val description: String? = null, // short 2-3 sentence description of the event
-    val started_at: LocalDateTime? = null,
-    val finished_at: LocalDateTime? = null,
+    val description: String,
+    val startDate: LocalDate? = null,
+    val startTime: LocalTime? = null,
+    val endDate: LocalDate? = null,
+    val endTime: LocalTime? = null,
     val category: String? = null,
-    )
+    val status: String? = null,
+    val outcome: String? = null,
+    val impact: String? = null
+)
 
-data class Relationship(
-    val name: String? = null,
-    val start_node_id: String? = null,
-    val end_node_id: String? = null,
-    val properties: Map<String, String>? = null,
-    val created_at: LocalDateTime? = null,
-    val source_id: String? = null,
+/**
+ * ===========================================
+ * Knowledge Graph Relationships Data Classes
+ * ===========================================
+ * Generated for: Person, Organisation, Event, Article, Knowledge, etc.
+ * Each relationship represents an edge between two nodes in the graph.
+ * All relationships include: created_at and source_id/source_ids
+ */
+
+data class MentionsRelationship(
+    val start_node_id: String,
+    val end_node_id: String,
+    val evidence: String? = null,
 )
 
 data class ExtractedNodes(
-    val article: Article,
-    val people: List<Person>,
-    val organisations: List<Organisation>,
-    val knowledge_points: List<Knowledge>,
-    val locations: List<Location>,
-    val events: List<Event>,
-    val relationships: List<Relationship>,
+    val article: ArticleNode,
+    val people: List<PersonNode>? = null,
+    val organisations: List<OrganisationNode>? = null,
+    val knowledge: List<KnowledgeNode>? = null,
+    val locations: List<LocationNode>? = null,
+    val events: List<EventNode>? = null
 )
 
-data class ExtractedResult(
-    val extracted_nodes: ExtractedNodes
-) : HasContent {
+data class ExtractedRelationships(
+    val mentionsReltionships: List<MentionsRelationship>? = null,
+    val reasoning: String
+)
 
-    override val content: String
-        get() = """
-            # Article
-            
-            ${extracted_nodes.article.title}
-            ${extracted_nodes.article.content}
-            
-            # People
-            
-            ${extracted_nodes.people.joinToString("\n")}
-            
-            # Organisations
-            
-            ${extracted_nodes.organisations.joinToString("\n")}
-            
-            # Knowledge
-            
-            ${extracted_nodes.knowledge_points.joinToString("\n")}
-            
-            # Locations
-            
-            ${extracted_nodes.locations.joinToString("\n")}
-            
-            # Events
-            
-            ${extracted_nodes.events.joinToString("\n")}
-            
-            # Relationships
-            
-            ${extracted_nodes.relationships.joinToString("\n")}
+data class FormattedExtraction(
+    val nodes: ExtractedNodes,
+    val relationships: ExtractedRelationships
+) {
+    override fun toString(): String {
+        return """
+        # Extracted Knowledge Graph
+
+        ## Nodes
+        ### Article
+        - ${nodes.article.title}
+
+        ### People
+        ${nodes.people?.joinToString("\n") { "- ${it.name}" }}
+
+        ### Organisations
+        ${nodes.organisations?.joinToString("\n") { "- ${it.name}" }}
+
+        ### Locations
+        ${nodes.locations?.joinToString("\n") { "- ${it.name}" }}
+
+        ### Events
+        ${nodes.events?.joinToString("\n") { "- ${it.description}" }}
+
+        ### Knowledge
+        ${nodes.knowledge?.joinToString("\n") { "- ${it.fact}" }}
         """.trimIndent()
+    }
 }

@@ -17,7 +17,7 @@ interface BaseNode {
 @Node("Person")
 data class Person(
     @Id @GeneratedValue override val id: Long? = null,
-    val name: String, // Changed from firstName/surname to a single name for easier matching
+    val name: String,
     var nicknames: List<String>? = null,
     var dob: LocalDate? = null,
     var nationalities: List<String>? = null,
@@ -25,8 +25,9 @@ data class Person(
     var weight: Int? = null, // in kg
     var gender: String? = null,
     var occupations: List<String>? = null,
-    @Relationship(type = "RELATED_TO")
-    var relations: MutableSet<BaseNode> = mutableSetOf()
+
+    @Relationship(type = "MENTIONS", direction = Relationship.Direction.INCOMING)
+    var mentioned: List<Mentions> = listOf()
 ) : BaseNode
 
 @Node("Organisation")
@@ -34,9 +35,7 @@ data class Organisation(
     @Id @GeneratedValue override val id: Long? = null,
     val name: String,
     var dateFounded: LocalDate? = null,
-    var description: String? = null,
-    @Relationship(type = "RELATED_TO")
-    var relations: MutableSet<BaseNode> = mutableSetOf()
+    var description: String? = null
 ) : BaseNode
 
 @Node("Location")
@@ -48,9 +47,7 @@ data class Location(
     var city: String? = null,
     var country: String? = null,
     var latitude: Double? = null,
-    var longitude: Double? = null,
-    @Relationship(type = "RELATED_TO")
-    var relations: MutableSet<BaseNode> = mutableSetOf()
+    var longitude: Double? = null
 ) : BaseNode
 
 @Node("Event")
@@ -64,9 +61,7 @@ data class Event(
     var category: String? = null,
     var status: String? = null,
     var outcome: String? = null,
-    var impact: String? = null,
-    @Relationship(type = "RELATED_TO")
-    var relations: MutableSet<BaseNode> = mutableSetOf()
+    var impact: String? = null
 ) : BaseNode
 
 @Node("Knowledge")
@@ -74,9 +69,7 @@ data class Knowledge(
     @Id @GeneratedValue override val id: Long? = null,
     val fact: String,
     var category: String? = null,
-    var dateOfFact: LocalDate? = null,
-    @Relationship(type = "RELATED_TO")
-    var relations: MutableSet<BaseNode> = mutableSetOf()
+    var dateOfFact: LocalDate? = null
 ) : BaseNode
 
 @Node("Article")
@@ -91,6 +84,7 @@ data class Article(
     val scrapeDateTime: LocalDateTime?,
     val agentProcessId: String?,
     val sentiment: String?,
-    @Relationship(type = "MENTIONS")
-    var mentions: MutableSet<BaseNode> = mutableSetOf()
+
+    @Relationship(type = "MENTIONS", direction = Relationship.Direction.OUTGOING)
+    var mentions: List<Mentions> = listOf()
 ) : BaseNode

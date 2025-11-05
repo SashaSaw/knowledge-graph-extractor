@@ -2,10 +2,14 @@
 package com.embabel.template.service
 
 import com.embabel.template.agent.ExtractedNodes
+import com.embabel.template.agent.ExtractedRelationships
+import com.embabel.template.agent.KnowledgeGraphExtractorAgent
 import com.embabel.template.graph.model.*
 import com.embabel.template.graph.repository.*
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.Instant
 
 @Service
 class KnowledgeGraphService(
@@ -16,117 +20,103 @@ class KnowledgeGraphService(
     private val knowledgeRepository: KnowledgeRepository,
     private val articleRepository: ArticleRepository
 ) {
+    private val logger = LoggerFactory.getLogger(KnowledgeGraphExtractorAgent::class.java)
 
     @Transactional
-    fun saveExtractedData(extractedData: ExtractedNodes) {
+    fun saveExtractedData(extractedData: ExtractedNodes, extractedRelationships: ExtractedRelationships) {
         val idMap = mutableMapOf<String, BaseNode>()
 
         val article = articleRepository.save(
             Article(
-                title = extractedData.article.title ?: "Untitled",
-                url = extractedData.article.URL,
-                content = extractedData.article.content ?: "",
+                title = extractedData.article.title,
+                url = extractedData.article.url,
+                content = extractedData.article.content,
                 language = extractedData.article.language,
                 summary = extractedData.article.summary,
-                publishDateTime = extractedData.article.publish_datetime,
-                scrapeDateTime = extractedData.article.scrape_datetime,
+                publishDateTime = extractedData.article.publishDateTime,
+                scrapeDateTime = extractedData.article.scrapeDateTime,
                 agentProcessId = null, // This can be added later if needed
                 sentiment = extractedData.article.sentiment
             )
         )
         idMap[extractedData.article.id] = article
 
-        extractedData.people.forEach { p ->
-            val name = "${p.first_name ?: ""} ${p.surname ?: ""}".trim()
-            if (name.isNotEmpty()) {
-                val person = personRepository.findByName(name) ?: Person(name = name, gender = p.sex)
-                person.nicknames = p.other_names
-                person.nationalities = p.nationalities
-                person.height = p.height
-                person.weight = p.weight
-                person.occupations = p.occupations
-                idMap[p.id] = personRepository.save(person)
-            }
+        extractedData.people?.forEach { p ->
+            val person = personRepository.findByName(p.name) ?: Person(name = p.name, gender = p.gender)
+            person.nicknames = p.nicknames
+            person.nationalities = p.nationalities
+            person.height = p.height
+            person.weight = p.weight
+            person.occupations = p.occupations
+            idMap[p.id] = personRepository.save(person)
         }
 
-        extractedData.organisations.forEach { o ->
-            o.name?.let { name ->
-                val org = organisationRepository.findByName(name) ?: Organisation(name = name)
-                org.description = o.description
-                idMap[o.id] = organisationRepository.save(org)
-            }
+        extractedData.organisations?.forEach { o ->
+            val org = organisationRepository.findByName(o.name) ?: Organisation(name = o.name)
+            org.description = o.description
+            idMap[o.id] = organisationRepository.save(org)
         }
 
-        extractedData.locations.forEach { l ->
-            l.name?.let { name ->
-                val loc = locationRepository.findByName(name) ?: Location(name = name)
-                loc.number = l.number?.toString()
-                loc.street = l.street
-                loc.city = l.city
-                loc.country = l.country
-                idMap[l.id] = locationRepository.save(loc)
-            }
+        extractedData.locations?.forEach { l ->
+            val loc = locationRepository.findByName(l.name) ?: Location(name = l.name)
+            loc.number = l.number
+            loc.street = l.street
+            loc.city = l.city
+            loc.country = l.country
+            idMap[l.id] = locationRepository.save(loc)
         }
 
-        extractedData.events.forEach { e ->
-            e.description?.let { description ->
-                val event = Event(
-                    description = description,
-                    startDate = e.started_at?.toLocalDate(),
-                    startTime = e.started_at?.toLocalTime(),
-                    endDate = e.finished_at?.toLocalDate(),
-                    endTime = e.finished_at?.toLocalTime(),
-                    category = e.category,
-                    status = null,
-                    outcome = null,
-                    impact = null
-                )
-                idMap[e.id] = eventRepository.save(event)
-            }
+        extractedData.events?.forEach { e ->
+            val event = Event(
+                description = e.description,
+                startDate = e.startDate,
+                startTime = e.startTime,
+                endDate = e.endDate,
+                endTime = e.endTime,
+                category = e.category,
+                status = e.status,
+                outcome = e.outcome,
+                impact = e.impact
+            )
+            idMap[e.id] = eventRepository.save(event)
         }
 
-        extractedData.knowledge_points.forEach { k ->
-            k.fact?.let { fact ->
-                val knowledge = Knowledge(
-                    fact = fact,
-                    category = k.topic,
-                    dateOfFact = null
-                )
-                idMap[k.id] = knowledgeRepository.save(knowledge)
-            }
+        extractedData.knowledge?.forEach { k ->
+            val knowledge = Knowledge(
+                fact = k.fact,
+                category = k.category,
+                dateOfFact = k.dateOfFact
+            )
+            idMap[k.id] = knowledgeRepository.save(knowledge)
         }
 
-        extractedData.relationships.forEach { rel ->
-            val sourceNode = idMap[rel.source_id]
-            val targetNode = idMap[rel.end_node_id]
-
+        extractedRelationships.mentionsReltionships?.forEach { rel ->
+            val sourceNode = idMap[rel.start_node_id] as? Article
+            logger.info("source node ${sourceNode?.id}, ${sourceNode?.title}")
+            val targetNode = idMap[rel.end_node_id] as? Person
+            logger.info("target node ${targetNode?.id}, ${targetNode?.name}")
             if (sourceNode != null && targetNode != null) {
-                when (sourceNode) {
-                    is Person -> {
-                        sourceNode.relations.add(targetNode)
-                        personRepository.save(sourceNode)
-                    }
-                    is Organisation -> {
-                        sourceNode.relations.add(targetNode)
-                        organisationRepository.save(sourceNode)
-                    }
-                    is Location -> {
-                        sourceNode.relations.add(targetNode)
-                        locationRepository.save(sourceNode)
-                    }
-                    is Event -> {
-                        sourceNode.relations.add(targetNode)
-                        eventRepository.save(sourceNode)
-                    }
-                    is Knowledge -> {
-                        sourceNode.relations.add(targetNode)
-                        knowledgeRepository.save(sourceNode)
-                    }
-                    is Article -> {
-                        sourceNode.mentions.add(targetNode)
-                        articleRepository.save(sourceNode)
-                    }
-                }
+                val evidence = rel.evidence
+                val createdAt = Instant.now()
+
+                val mentionRel = Mentions(
+                    target = targetNode,
+                    evidence = evidence,
+                    createdAt = createdAt
+                )
+
+                // Safely append to the list (since Kotlin data classes are immutable)
+                sourceNode.mentions = sourceNode.mentions + mentionRel
+            }
+        }
+
+
+        idMap.values.forEach { node ->
+            when (node) {
+                is Person -> personRepository.save(node)
+                is Organisation -> organisationRepository.save(node)
+                is Location -> locationRepository.save(node)
+                is Article -> articleRepository.save(node)
             }
         }
     }
