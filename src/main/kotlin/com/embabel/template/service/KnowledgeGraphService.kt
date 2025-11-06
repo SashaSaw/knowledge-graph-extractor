@@ -39,22 +39,22 @@ class KnowledgeGraphService(
                 sentiment = extractedData.article.sentiment
             )
         )
-        idMap[extractedData.article.id] = article
+        idMap[extractedData.article.id as String] = article
 
         extractedData.people?.forEach { p ->
-            val person = personRepository.findByName(p.name) ?: Person(name = p.name, gender = p.gender)
+            val person = personRepository.findByFirstNameAndLastName(p.first_name, p.last_name) ?: Person(firstName = p.first_name, lastName = p.last_name)
             person.nicknames = p.nicknames?.filterNotNull()
             person.nationalities = p.nationalities?.filterNotNull()
             person.height = p.height
             person.weight = p.weight
             person.occupations = p.occupations?.filterNotNull()
-            idMap[p.id] = personRepository.save(person)
+            idMap[p.id as String] = personRepository.save(person)
         }
 
         extractedData.organisations?.forEach { o ->
             val org = organisationRepository.findByName(o.name) ?: Organisation(name = o.name)
             org.description = o.description
-            idMap[o.id] = organisationRepository.save(org)
+            idMap[o.id as String] = organisationRepository.save(org)
         }
 
         extractedData.locations?.forEach { l ->
@@ -63,7 +63,7 @@ class KnowledgeGraphService(
             loc.street = l.street
             loc.city = l.city
             loc.country = l.country
-            idMap[l.id] = locationRepository.save(loc)
+            idMap[l.id as String] = locationRepository.save(loc)
         }
 
         extractedData.events?.forEach { e ->
@@ -78,7 +78,7 @@ class KnowledgeGraphService(
                 outcome = e.outcome,
                 impact = e.impact
             )
-            idMap[e.id] = eventRepository.save(event)
+            idMap[e.id as String] = eventRepository.save(event)
         }
 
         extractedData.knowledge?.forEach { k ->
@@ -87,14 +87,14 @@ class KnowledgeGraphService(
                 category = k.category,
                 dateOfFact = k.dateOfFact
             )
-            idMap[k.id] = knowledgeRepository.save(knowledge)
+            idMap[k.id as String] = knowledgeRepository.save(knowledge)
         }
 
         extractedRelationships.mentionsPersonReltionships?.forEach { rel ->
             val sourceNode = idMap[rel.start_node_id] as? Article
             logger.info("source node ${sourceNode?.id}, ${sourceNode?.title}")
             val targetNode = idMap[rel.end_node_id] as? Person
-            logger.info("target node ${targetNode?.id}, ${targetNode?.name}")
+            logger.info("target node ${targetNode?.id}, ${targetNode?.firstName} ${targetNode?.lastName}")
             if (sourceNode != null && targetNode != null) {
                 val evidence = rel.evidence
                 val createdAt = Instant.now()
@@ -114,7 +114,7 @@ class KnowledgeGraphService(
             val sourceNode = idMap[rel.start_node_id] as? Knowledge
             logger.info("source node ${sourceNode?.id}, ${sourceNode?.fact}")
             val targetNode = idMap[rel.end_node_id] as? Person
-            logger.info("target node ${targetNode?.id}, ${targetNode?.name}")
+            logger.info("target node ${targetNode?.id}, ${targetNode?.firstName} ${targetNode?.lastName}")
             if (sourceNode != null && targetNode != null) {
                 val createdAt = Instant.now()
 

@@ -6,6 +6,7 @@ import com.embabel.agent.api.annotation.Action
 import com.embabel.agent.api.annotation.Agent
 import com.embabel.agent.api.common.OperationContext
 import com.embabel.agent.domain.io.UserInput
+import com.embabel.common.ai.model.LlmOptions
 import com.embabel.template.service.KnowledgeGraphService
 import org.springframework.context.annotation.Profile
 import org.slf4j.LoggerFactory
@@ -168,86 +169,88 @@ class KnowledgeGraphExtractorAgent(private val knowledgeGraphService: KnowledgeG
         Content: ${article.content}
         """.trimIndent()
 
-        val mockExtractedNodes = ExtractedNodes(
-            article = ArticleNode(
-                id = "9fb38238-ab30-4489-b75a-2b084d15d9cd",
-                title = "Another huge scandal, Marcus Rashford will pay for this after his indiscipline",
-                url = "[provided_url]",
-                content = "Marcus Rashford earns a lot of money at Manchester United (382,000 euros a week), but the striker is not happy. He has been feuding with Erik Ten Hag for months and his role on the team has become residual. Annoyed by the desperate months he is going through, the footballer went out partying on Thursday and Friday. And on Sunday he was left out of the call.\n\nManchester United just leads in the FA Cup at halftime against Newport County.\nIn addition to the sporting punishment, Rashford faces, according to 'The Sun', a financial fine of 750,000 euros (which is equivalent to two weeks' salary), an amount that, although it is not money for him, for most mortals it is a huge figure. Last November, Ten Hag already criticized Rashford for partying after losing 3-0 to his archrival, Manchester City.\n\nManchester United striker Marcus Rashford once again made headlines when he was spotted at a Belfast nightclub on Thursday, hours before missing team training, citing illness. This episode marks the second time he was seen there before reporting his inability to attend training on Friday, despite previously being seen in Northern Ireland on Wednesday.\nImages spread on social media suggest that Rashford entered Thompsons Garage nightclub on Wednesday night. Sources close to the footballer indicate that he was having dinner, providing details to the chronology of events. Although he returned to Manchester on Friday morning, he was absent from training due to his health condition, as reported by Mail Sport.\nContradicting the initial version, The Athletic presents footage showing Rashford at a club in the country's capital hours before his supposed meeting in Carrington. Erik ten Hag, Manchester United coach, confirmed the English international's absence due to illness in a press conference prior to the FA Cup match against Newport County. During his trip, Rashford visited the Larne team's training ground, where his former teammate Roshaun Williams now plays. Although Thursday was scheduled as a day off for the players, reports indicate that Rashford was nowhere near United's training complex the night before, attending Lavery's Bar on Wednesday and Thompsons Garage nightclub on Thursday.",
-                language = "en",
-                summary = "Marcus Rashford faces financial penalty and missing training due to partying in Belfast nightclub.",
-                publishDateTime = LocalDateTime.parse("2025-11-06T12:34:56"),
-                scrapeDateTime = LocalDateTime.parse("2025-11-06T13:00:00"),
-                agentProcessId = null,
-                sentiment = "negative"
-            ),
-            people = listOf(
-                PersonNode(
-                    id = "4d25c0a9-d8a9-4151-a872-acd4ccfbbb29",
-                    name = "Marcus Rashford",
-                    nicknames = listOf("Rash", "Mars"),
-                    occupations = listOf("footballer")
-                )
-            ),
-            organisations = listOf(
-                OrganisationNode(id = "12ce8487-dfa7-4baf-9c43-327b7b198b8b", name = "Manchester United"),
-                OrganisationNode(id = "e328bd9b-170a-48d6-8263-5b762031b6f8", name = "Larne"),
-                OrganisationNode(id = "e4e3dd9a-5df5-4dd7-90a7-6e7c942788af", name = "Thompsons Garage"),
-                OrganisationNode(id = "7ef30b23-ce49-46e9-bcc2-3c023d4a2230", name = "The Athletic")
-            ),
-            knowledge = listOf(
-                KnowledgeNode(
-                    id = "34ecf13f-faa2-46e0-a7e7-aec1abe27ff0",
-                    fact = "\"Rashford earns €382,000 per week\"",
-                    category = "salary",
-                    dateOfFact = LocalDate.parse("2025-11-06")
-                ),
-                KnowledgeNode(
-                    id = "3000b399-23e1-4df6-ae8e-280f7358beed",
-                    fact = "\"Rashford fined €750,000\"",
-                    category = "financial penalty",
-                    dateOfFact = LocalDate.parse("2025-11-06")
-                )
-            ),
-            locations = listOf(
-                LocationNode(
-                    id = "8fa78622-8a47-4567-8a9a-2d29b6130443",
-                    name = "Belfast",
-                    city = "Manchester",
-                    country = "United Kingdom"
-                )
-            ),
-            events = listOf(
-                EventNode(
-                    id = "4861c163-8aac-4f72-a5e6-53eca0f2f477",
-                    description = "Rashford Disciplinary Incident",
-                    startDate = LocalDate.parse("2025-11-06"),
-                    endDate = LocalDate.parse("2025-11-07"),
-                    category = "disciplinary",
-                    status = "ongoing",
-                    outcome = "fine and training ban"
-                ),
-                EventNode(
-                    id = "3cb5e3c3-1695-4f94-9796-5bf1e3fbc777",
-                    description = "FA Cup Match vs Newport County",
-                    startDate = LocalDate.parse("2025-11-05"),
-                    endDate = LocalDate.parse("2025-11-06"),
-                    category = "football",
-                    status = "completed"
-                )
-            )
-        )
-        return mockExtractedNodes
+//        val mockExtractedNodes = ExtractedNodes(
+//            article = ArticleNode(
+//                id = "9fb38238-ab30-4489-b75a-2b084d15d9cd",
+//                title = "Another huge scandal, Marcus Rashford will pay for this after his indiscipline",
+//                url = "[provided_url]",
+//                content = "Marcus Rashford earns a lot of money at Manchester United (382,000 euros a week), but the striker is not happy. He has been feuding with Erik Ten Hag for months and his role on the team has become residual. Annoyed by the desperate months he is going through, the footballer went out partying on Thursday and Friday. And on Sunday he was left out of the call.\n\nManchester United just leads in the FA Cup at halftime against Newport County.\nIn addition to the sporting punishment, Rashford faces, according to 'The Sun', a financial fine of 750,000 euros (which is equivalent to two weeks' salary), an amount that, although it is not money for him, for most mortals it is a huge figure. Last November, Ten Hag already criticized Rashford for partying after losing 3-0 to his archrival, Manchester City.\n\nManchester United striker Marcus Rashford once again made headlines when he was spotted at a Belfast nightclub on Thursday, hours before missing team training, citing illness. This episode marks the second time he was seen there before reporting his inability to attend training on Friday, despite previously being seen in Northern Ireland on Wednesday.\nImages spread on social media suggest that Rashford entered Thompsons Garage nightclub on Wednesday night. Sources close to the footballer indicate that he was having dinner, providing details to the chronology of events. Although he returned to Manchester on Friday morning, he was absent from training due to his health condition, as reported by Mail Sport.\nContradicting the initial version, The Athletic presents footage showing Rashford at a club in the country's capital hours before his supposed meeting in Carrington. Erik ten Hag, Manchester United coach, confirmed the English international's absence due to illness in a press conference prior to the FA Cup match against Newport County. During his trip, Rashford visited the Larne team's training ground, where his former teammate Roshaun Williams now plays. Although Thursday was scheduled as a day off for the players, reports indicate that Rashford was nowhere near United's training complex the night before, attending Lavery's Bar on Wednesday and Thompsons Garage nightclub on Thursday.",
+//                language = "en",
+//                summary = "Marcus Rashford faces financial penalty and missing training due to partying in Belfast nightclub.",
+//                publishDateTime = LocalDateTime.parse("2025-11-06T12:34:56"),
+//                scrapeDateTime = LocalDateTime.parse("2025-11-06T13:00:00"),
+//                agentProcessId = null,
+//                sentiment = "negative"
+//            ),
+//            people = listOf(
+//                PersonNode(
+//                    id = "4d25c0a9-d8a9-4151-a872-acd4ccfbbb29",
+//                    first_name = "Marcus",
+//                    last_name = "Rashford",
+//                    nicknames = listOf("Rash", "Mars"),
+//                    occupations = listOf("footballer")
+//                )
+//            ),
+//            organisations = listOf(
+//                OrganisationNode(id = "12ce8487-dfa7-4baf-9c43-327b7b198b8b", name = "Manchester United"),
+//                OrganisationNode(id = "e328bd9b-170a-48d6-8263-5b762031b6f8", name = "Larne"),
+//                OrganisationNode(id = "e4e3dd9a-5df5-4dd7-90a7-6e7c942788af", name = "Thompsons Garage"),
+//                OrganisationNode(id = "7ef30b23-ce49-46e9-bcc2-3c023d4a2230", name = "The Athletic")
+//            ),
+//            knowledge = listOf(
+//                KnowledgeNode(
+//                    id = "34ecf13f-faa2-46e0-a7e7-aec1abe27ff0",
+//                    fact = "\"Rashford earns €382,000 per week\"",
+//                    category = "salary",
+//                    dateOfFact = LocalDate.parse("2025-11-06")
+//                ),
+//                KnowledgeNode(
+//                    id = "3000b399-23e1-4df6-ae8e-280f7358beed",
+//                    fact = "\"Rashford fined €750,000\"",
+//                    category = "financial penalty",
+//                    dateOfFact = LocalDate.parse("2025-11-06")
+//                )
+//            ),
+//            locations = listOf(
+//                LocationNode(
+//                    id = "8fa78622-8a47-4567-8a9a-2d29b6130443",
+//                    name = "Belfast",
+//                    city = "Manchester",
+//                    country = "United Kingdom"
+//                )
+//            ),
+//            events = listOf(
+//                EventNode(
+//                    id = "4861c163-8aac-4f72-a5e6-53eca0f2f477",
+//                    description = "Rashford Disciplinary Incident",
+//                    startDate = LocalDate.parse("2025-11-06"),
+//                    endDate = LocalDate.parse("2025-11-07"),
+//                    category = "disciplinary",
+//                    status = "ongoing",
+//                    outcome = "fine and training ban"
+//                ),
+//                EventNode(
+//                    id = "3cb5e3c3-1695-4f94-9796-5bf1e3fbc777",
+//                    description = "FA Cup Match vs Newport County",
+//                    startDate = LocalDate.parse("2025-11-05"),
+//                    endDate = LocalDate.parse("2025-11-06"),
+//                    category = "football",
+//                    status = "completed"
+//                )
+//            )
+//        )
+//        return mockExtractedNodes
 
 //        val nodes = context.ai().withDefaultLlm().createObject(prompt, ExtractedNodes::class.java)
-//        return nodes.copy(
-//            article = nodes.article.copy(id = UUID.randomUUID().toString()),
-//            people = nodes.people?.map { it.copy(id = UUID.randomUUID().toString()) },
-//            organisations = nodes.organisations?.map { it.copy(id = UUID.randomUUID().toString()) },
-//            locations = nodes.locations?.map { it.copy(id = UUID.randomUUID().toString()) },
-//            events = nodes.events?.map { it.copy(id = UUID.randomUUID().toString()) },
-//            knowledge = nodes.knowledge?.map { it.copy(id = UUID.randomUUID().toString()) }
-//        )
+        val nodes = context.ai().withLlm(LlmOptions.withAutoLlm().withTemperature(0.7)).createObject(prompt, ExtractedNodes::class.java)
+        return nodes.copy(
+            article = nodes.article.copy(id = UUID.randomUUID().toString()),
+            people = nodes.people?.map { it.copy(id = UUID.randomUUID().toString()) },
+            organisations = nodes.organisations?.map { it.copy(id = UUID.randomUUID().toString()) },
+            locations = nodes.locations?.map { it.copy(id = UUID.randomUUID().toString()) },
+            events = nodes.events?.map { it.copy(id = UUID.randomUUID().toString()) },
+            knowledge = nodes.knowledge?.map { it.copy(id = UUID.randomUUID().toString()) }
+        )
     }
 
     @Action
@@ -275,19 +278,19 @@ The Article Node:
   - title: ${nodes.article.title}
   - content: ${nodes.article.content}
 
-Person Nodes:
-${nodes.people?.joinToString("\n") { "  - id: ${it.id}\n    name: ${it.name}" } ?: "  []"}
+PERSON NODES:
+${nodes.people?.joinToString("\n") { "  - id: ${it.id}\n    name: ${it.first_name} ${it.last_name}" } ?: "  []"}
 
-Organisation Nodes:
+ORGANISATION NODES:
 ${nodes.organisations?.joinToString("\n") { "  - id: ${it.id}\n    name: ${it.name}" } ?: "  []"}
 
-Knowledge Nodes:
+KNOWLEDGE NODES:
 ${nodes.knowledge?.joinToString("\n") { "  - id: ${it.id}\n    fact: ${it.fact}" } ?: "  []"}
 
-Location Nodes:
+LOCATION NODES:
 ${nodes.locations?.joinToString("\n") { "  - id: ${it.id}\n    name: ${it.name}" } ?: "  []"}
 
-Event Nodes:
+EVENT NODES:
 ${nodes.events?.joinToString("\n") { "  - id: ${it.id}\n    description: ${it.description}" } ?: "  []"}
 
 ---
@@ -348,93 +351,88 @@ Please also include clear reasoning for why you have or have not created any rel
 
 Now produce the JSON output.
 """.trimIndent()
-        val mockExtractedRelationships = ExtractedRelationships(
-            mentionsPersonReltionships = listOf(
-                MentionsPersonRelationship(
-                    start_node_id = "9fb38238-ab30-4489-b75a-2b084d15d9cd",
-                    end_node_id = "4d25c0a9-d8a9-4151-a872-acd4ccfbbb29",
-                    evidence = "because I said so"
-                )
-            ),
-            aboutPersonRelationships = listOf(
-                AboutPersonRelationship(
-                    start_node_id = "34ecf13f-faa2-46e0-a7e7-aec1abe27ff0",
-                    end_node_id = "4d25c0a9-d8a9-4151-a872-acd4ccfbbb29"
-                ),
-                AboutPersonRelationship(
-                    start_node_id = "3000b399-23e1-4df6-ae8e-280f7358beed",
-                    end_node_id = "4d25c0a9-d8a9-4151-a872-acd4ccfbbb29"
-                )
-            ),
-            involvedPersonRelationships = listOf(
-                InvolvedPersonRelationship(
-                    start_node_id = "4861c163-8aac-4f72-a5e6-53eca0f2f477",
-                    end_node_id = "4d25c0a9-d8a9-4151-a872-acd4ccfbbb29"
-                )
-            ),
-            mentionsOrganisationRelationships = listOf(
-                MentionsOrganisationRelationship(
-                    start_node_id = "9fb38238-ab30-4489-b75a-2b084d15d9cd",
-                    end_node_id = "12ce8487-dfa7-4baf-9c43-327b7b198b8b"
-                ),
-                MentionsOrganisationRelationship(
-                    start_node_id = "9fb38238-ab30-4489-b75a-2b084d15d9cd",
-                    end_node_id = "e328bd9b-170a-48d6-8263-5b762031b6f8"
-                ),
-                MentionsOrganisationRelationship(
-                    start_node_id = "e4e3dd9a-5df5-4dd7-90a7-6e7c942788af",
-                    end_node_id = "12ce8487-dfa7-4baf-9c43-327b7b198b8b"
-                ),
-                MentionsOrganisationRelationship(
-                    start_node_id = "e4e3dd9a-5df5-4dd7-90a7-6e7c942788af",
-                    end_node_id = "7ef30b23-ce49-46e9-bcc2-3c023d4a2230"
-                ),
-            ),
-            aboutOrganisationRelationships = listOf(
-                AboutOrganisationRelationship(
-                    start_node_id = "3000b399-23e1-4df6-ae8e-280f7358beed",
-                    end_node_id = "12ce8487-dfa7-4baf-9c43-327b7b198b8b"
-                )
-            ),
-            involvedOrganisationRelationships = listOf(
-                InvolvedOrganisationRelationship(
-                    start_node_id = "3cb5e3c3-1695-4f94-9796-5bf1e3fbc777",
-                    end_node_id = "12ce8487-dfa7-4baf-9c43-327b7b198b8b",
-                )
-            ),
-            sourcedFromRelationships = listOf(
-                SourcedFromRelationship(
-                    start_node_id = "34ecf13f-faa2-46e0-a7e7-aec1abe27ff0",
-                    end_node_id = "9fb38238-ab30-4489-b75a-2b084d15d9cd"
-                ),
-                SourcedFromRelationship(
-                    start_node_id = "3000b399-23e1-4df6-ae8e-280f7358beed",
-                    end_node_id = "9fb38238-ab30-4489-b75a-2b084d15d9cd"
-                )
-            ),
-            mentionsEventRelationships = listOf(
-                MentionsEventRelationship(
-                    start_node_id = "9fb38238-ab30-4489-b75a-2b084d15d9cd",
-                    end_node_id = "4861c163-8aac-4f72-a5e6-53eca0f2f477"
-                ),
-                MentionsEventRelationship(
-                    start_node_id = "9fb38238-ab30-4489-b75a-2b084d15d9cd",
-                    end_node_id = "3cb5e3c3-1695-4f94-9796-5bf1e3fbc777"
-                )
-            ),
-            occuredInRelationships = listOf(
-                OccuredInRelationship(
-                    start_node_id = "4861c163-8aac-4f72-a5e6-53eca0f2f477",
-                    end_node_id = "8fa78622-8a47-4567-8a9a-2d29b6130443"
-                ),
-            ),
-            mentionsLocationRelationships = null,
-            reasoning = "Mock relationships generated from the Rashford article example, connecting article, people, organisations, knowledge, and events per schema direction."
-        )
-        return mockExtractedRelationships
-//        return context.ai()
-//            .withDefaultLlm()
-//            .createObject(prompt, ExtractedRelationships::class.java)
+//        val mockExtractedRelationships = ExtractedRelationships(
+//            mentionsPersonReltionships = listOf(
+//                MentionsPersonRelationship(
+//                    start_node_id = "9fb38238-ab30-4489-b75a-2b084d15d9cd",
+//                    end_node_id = "4d25c0a9-d8a9-4151-a872-acd4ccfbbb29",
+//                    evidence = "because I said so"
+//                )
+//            ),
+//            aboutPersonRelationships = listOf(
+//                AboutPersonRelationship(
+//                    start_node_id = "34ecf13f-faa2-46e0-a7e7-aec1abe27ff0",
+//                    end_node_id = "4d25c0a9-d8a9-4151-a872-acd4ccfbbb29"
+//                ),
+//                AboutPersonRelationship(
+//                    start_node_id = "3000b399-23e1-4df6-ae8e-280f7358beed",
+//                    end_node_id = "4d25c0a9-d8a9-4151-a872-acd4ccfbbb29"
+//                )
+//            ),
+//            involvedPersonRelationships = listOf(
+//                InvolvedPersonRelationship(
+//                    start_node_id = "4861c163-8aac-4f72-a5e6-53eca0f2f477",
+//                    end_node_id = "4d25c0a9-d8a9-4151-a872-acd4ccfbbb29"
+//                )
+//            ),
+//            mentionsOrganisationRelationships = listOf(
+//                MentionsOrganisationRelationship(
+//                    start_node_id = "9fb38238-ab30-4489-b75a-2b084d15d9cd",
+//                    end_node_id = "12ce8487-dfa7-4baf-9c43-327b7b198b8b"
+//                ),
+//                MentionsOrganisationRelationship(
+//                    start_node_id = "9fb38238-ab30-4489-b75a-2b084d15d9cd",
+//                    end_node_id = "e328bd9b-170a-48d6-8263-5b762031b6f8"
+//                ),
+//                MentionsOrganisationRelationship(
+//                    start_node_id = "9fb38238-ab30-4489-b75a-2b084d15d9cd",
+//                    end_node_id = "7ef30b23-ce49-46e9-bcc2-3c023d4a2230"
+//                ),
+//            ),
+//            aboutOrganisationRelationships = listOf(
+//                AboutOrganisationRelationship(
+//                    start_node_id = "3000b399-23e1-4df6-ae8e-280f7358beed",
+//                    end_node_id = "12ce8487-dfa7-4baf-9c43-327b7b198b8b"
+//                )
+//            ),
+//            involvedOrganisationRelationships = listOf(
+//                InvolvedOrganisationRelationship(
+//                    start_node_id = "3cb5e3c3-1695-4f94-9796-5bf1e3fbc777",
+//                    end_node_id = "12ce8487-dfa7-4baf-9c43-327b7b198b8b",
+//                )
+//            ),
+//            sourcedFromRelationships = listOf(
+//                SourcedFromRelationship(
+//                    start_node_id = "34ecf13f-faa2-46e0-a7e7-aec1abe27ff0",
+//                    end_node_id = "9fb38238-ab30-4489-b75a-2b084d15d9cd"
+//                ),
+//                SourcedFromRelationship(
+//                    start_node_id = "3000b399-23e1-4df6-ae8e-280f7358beed",
+//                    end_node_id = "9fb38238-ab30-4489-b75a-2b084d15d9cd"
+//                )
+//            ),
+//            mentionsEventRelationships = listOf(
+//                MentionsEventRelationship(
+//                    start_node_id = "9fb38238-ab30-4489-b75a-2b084d15d9cd",
+//                    end_node_id = "4861c163-8aac-4f72-a5e6-53eca0f2f477"
+//                ),
+//                MentionsEventRelationship(
+//                    start_node_id = "9fb38238-ab30-4489-b75a-2b084d15d9cd",
+//                    end_node_id = "3cb5e3c3-1695-4f94-9796-5bf1e3fbc777"
+//                )
+//            ),
+//            occuredInRelationships = listOf(
+//                OccuredInRelationship(
+//                    start_node_id = "4861c163-8aac-4f72-a5e6-53eca0f2f477",
+//                    end_node_id = "8fa78622-8a47-4567-8a9a-2d29b6130443"
+//                ),
+//            ),
+//            mentionsLocationRelationships = null,
+//            reasoning = "Mock relationships generated from the Rashford article example, connecting article, people, organisations, knowledge, and events per schema direction."
+//        )
+//        return mockExtractedRelationships
+
+        return context.ai().withLlm(LlmOptions.withAutoLlm().withTemperature(0.7)).createObject(prompt, ExtractedRelationships::class.java)
     }
 
     @AchievesGoal(description = "Nodes and relationships have been extracted from the article and saved to the knowledge graph")

@@ -17,7 +17,8 @@ interface BaseNode {
 @Node("Person")
 data class Person(
     @Id @GeneratedValue override val id: Long? = null,
-    val name: String,
+    val firstName: String,
+    val lastName: String,
     var nicknames: List<String>? = null,
     var dob: LocalDate? = null,
     var nationalities: List<String>? = null,

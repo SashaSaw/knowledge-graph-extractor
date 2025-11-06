@@ -22,7 +22,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 
 @SpringBootApplication
-@EnableAgents(localModels = [LocalModels.OLLAMA])
+@EnableAgents//(localModels = [LocalModels.OLLAMA])
 class HolistaqAgentApplication
 
 fun main(args: Array<String>) {

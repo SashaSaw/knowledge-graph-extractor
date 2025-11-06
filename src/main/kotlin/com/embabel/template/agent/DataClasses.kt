@@ -6,8 +6,9 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 
 data class PersonNode(
-    val id: String,
-    val name: String,
+    val id: String? = "",
+    val first_name: String,
+    val last_name: String,
     val nicknames: List<String>? = null,
     val dob: LocalDate? = null,
     val nationalities: List<String>? = null,
@@ -18,14 +19,14 @@ data class PersonNode(
 )
 
 data class OrganisationNode(
-    val id: String,
+    val id: String? = "",
     val name: String,
     val dateFounded: LocalDate? = null,
     val description: String? = null,
 )
 
 data class ArticleNode(
-    val id: String,
+    val id: String? = "",
     val title: String,
     val url: String?,
     val content: String,
@@ -38,14 +39,14 @@ data class ArticleNode(
 )
 
 data class KnowledgeNode(
-    val id: String,
+    val id: String? = "",
     val fact: String,
     val category: String? = null,
     val dateOfFact: LocalDate? = null
 )
 
 data class LocationNode(
-    val id: String,
+    val id: String? = "",
     val name: String,
     val number: String? = null,
     val street: String? = null,
@@ -56,7 +57,7 @@ data class LocationNode(
 )
 
 data class EventNode(
-    val id: String,
+    val id: String? = "",
     val description: String,
     val startDate: LocalDate? = null,
     val startTime: LocalTime? = null,
@@ -167,7 +168,7 @@ data class FormattedExtraction(
         - ${nodes.article.title}
 
         ### People
-        ${nodes.people?.joinToString("\n") { "- ${it.name}" }}
+        ${nodes.people?.joinToString("\n") { "- ${it.first_name} ${it.last_name}" }}
 
         ### Organisations
         ${nodes.organisations?.joinToString("\n") { "- ${it.name}" }}

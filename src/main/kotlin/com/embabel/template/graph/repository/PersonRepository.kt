@@ -7,5 +7,5 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface PersonRepository : Neo4jRepository<Person, Long> {
-    fun findByName(name: String): Person?
+    fun findByFirstNameAndLastName(firstName: String, lastName:String): Person?
 }
