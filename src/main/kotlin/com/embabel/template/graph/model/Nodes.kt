@@ -27,7 +27,11 @@ data class Person(
     var occupations: List<String>? = null,
 
     @Relationship(type = "MENTIONS", direction = Relationship.Direction.INCOMING)
-    var mentioned: List<Mentions> = listOf()
+    var mentioned: List<MentionsPerson> = listOf(),
+    @Relationship(type = "ABOUT", direction = Relationship.Direction.INCOMING)
+    var about: List<AboutPerson> = listOf(),
+    @Relationship(type = "INVOLVED_IN", direction = Relationship.Direction.INCOMING)
+    var involvedInEvents: List<InvolvedPerson> = listOf()
 ) : BaseNode
 
 @Node("Organisation")
@@ -35,7 +39,14 @@ data class Organisation(
     @Id @GeneratedValue override val id: Long? = null,
     val name: String,
     var dateFounded: LocalDate? = null,
-    var description: String? = null
+    var description: String? = null,
+
+    @Relationship(type = "MENTIONS", direction = Relationship.Direction.INCOMING)
+    var mentioned: List<MentionsOrganisation> = listOf(),
+    @Relationship(type = "ABOUT", direction = Relationship.Direction.INCOMING)
+    var about: List<AboutOrganisation> = listOf(),
+    @Relationship(type = "INVOLVED_IN", direction = Relationship.Direction.INCOMING)
+    var involvedInEvents: List<InvolvedOrganisation> = listOf()
 ) : BaseNode
 
 @Node("Location")
@@ -61,7 +72,14 @@ data class Event(
     var category: String? = null,
     var status: String? = null,
     var outcome: String? = null,
-    var impact: String? = null
+    var impact: String? = null,
+
+    @Relationship(type = "OCCURRED_IN", direction = Relationship.Direction.OUTGOING)
+    var occurredIn: List<OccuredIn> = listOf(),
+    @Relationship(type = "INVOLVED_IN", direction = Relationship.Direction.OUTGOING)
+    var involvedPeople: List<InvolvedPerson> = listOf(),
+    @Relationship(type = "INVOLVED_IN", direction = Relationship.Direction.OUTGOING)
+    var involvedOrganisations: List<InvolvedOrganisation> = listOf()
 ) : BaseNode
 
 @Node("Knowledge")
@@ -69,7 +87,14 @@ data class Knowledge(
     @Id @GeneratedValue override val id: Long? = null,
     val fact: String,
     var category: String? = null,
-    var dateOfFact: LocalDate? = null
+    var dateOfFact: LocalDate? = null,
+
+    @Relationship(type = "ABOUT", direction = Relationship.Direction.OUTGOING)
+    var aboutPeople: List<AboutPerson> = listOf(),
+    @Relationship(type = "ABOUT", direction = Relationship.Direction.OUTGOING)
+    var aboutOrganisations: List<AboutOrganisation> = listOf(),
+    @Relationship(type = "SOURCED_FROM", direction = Relationship.Direction.OUTGOING)
+    var sourcedFrom: List<SourcedFrom> = listOf()
 ) : BaseNode
 
 @Node("Article")
@@ -86,5 +111,11 @@ data class Article(
     val sentiment: String?,
 
     @Relationship(type = "MENTIONS", direction = Relationship.Direction.OUTGOING)
-    var mentions: List<Mentions> = listOf()
+    var mentionsPeople: List<MentionsPerson> = listOf(),
+    @Relationship(type = "MENTIONS", direction = Relationship.Direction.OUTGOING)
+    var mentionsOrganisations: List<MentionsOrganisation> = listOf(),
+    @Relationship(type = "MENTIONS", direction = Relationship.Direction.OUTGOING)
+    var mentionsLocations: List<MentionsLocation> = listOf(),
+    @Relationship(type = "MENTIONS", direction = Relationship.Direction.OUTGOING)
+    var mentionsEvents: List<MentionsEvent> = listOf()
 ) : BaseNode

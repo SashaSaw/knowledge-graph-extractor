@@ -43,11 +43,11 @@ class KnowledgeGraphService(
 
         extractedData.people?.forEach { p ->
             val person = personRepository.findByName(p.name) ?: Person(name = p.name, gender = p.gender)
-            person.nicknames = p.nicknames
-            person.nationalities = p.nationalities
+            person.nicknames = p.nicknames?.filterNotNull()
+            person.nationalities = p.nationalities?.filterNotNull()
             person.height = p.height
             person.weight = p.weight
-            person.occupations = p.occupations
+            person.occupations = p.occupations?.filterNotNull()
             idMap[p.id] = personRepository.save(person)
         }
 
@@ -90,7 +90,7 @@ class KnowledgeGraphService(
             idMap[k.id] = knowledgeRepository.save(knowledge)
         }
 
-        extractedRelationships.mentionsReltionships?.forEach { rel ->
+        extractedRelationships.mentionsPersonReltionships?.forEach { rel ->
             val sourceNode = idMap[rel.start_node_id] as? Article
             logger.info("source node ${sourceNode?.id}, ${sourceNode?.title}")
             val targetNode = idMap[rel.end_node_id] as? Person
@@ -99,17 +99,131 @@ class KnowledgeGraphService(
                 val evidence = rel.evidence
                 val createdAt = Instant.now()
 
-                val mentionRel = Mentions(
-                    target = targetNode,
+                val mentionRel = MentionsPerson(
+                    person = targetNode,
                     evidence = evidence,
-                    createdAt = createdAt
+                    createdAt = createdAt,
                 )
 
                 // Safely append to the list (since Kotlin data classes are immutable)
-                sourceNode.mentions = sourceNode.mentions + mentionRel
+                sourceNode.mentionsPeople = sourceNode.mentionsPeople + mentionRel
             }
         }
 
+        extractedRelationships.aboutPersonRelationships?.forEach { rel ->
+            val sourceNode = idMap[rel.start_node_id] as? Knowledge
+            logger.info("source node ${sourceNode?.id}, ${sourceNode?.fact}")
+            val targetNode = idMap[rel.end_node_id] as? Person
+            logger.info("target node ${targetNode?.id}, ${targetNode?.name}")
+            if (sourceNode != null && targetNode != null) {
+                val createdAt = Instant.now()
+
+                val aboutPersonRel = AboutPerson(
+                    person = targetNode,
+                    createdAt = createdAt,
+                )
+
+                // Safely append to the list (since Kotlin data classes are immutable)
+                sourceNode.aboutPeople = sourceNode.aboutPeople + aboutPersonRel
+            }
+        }
+
+        extractedRelationships.mentionsOrganisationRelationships?.forEach { rel ->
+            val sourceNode = idMap[rel.start_node_id] as? Article
+            val targetNode = idMap[rel.end_node_id] as? Organisation
+            if (sourceNode != null && targetNode != null) {
+                val mentionRel = MentionsOrganisation(
+                    organisation = targetNode,
+                    evidence = rel.evidence,
+                    createdAt = Instant.now()
+                )
+                sourceNode.mentionsOrganisations = sourceNode.mentionsOrganisations + mentionRel
+            }
+        }
+
+        extractedRelationships.aboutOrganisationRelationships?.forEach { rel ->
+            val sourceNode = idMap[rel.start_node_id] as? Knowledge
+            val targetNode = idMap[rel.end_node_id] as? Organisation
+            if (sourceNode != null && targetNode != null) {
+                val aboutRel = AboutOrganisation(
+                    organisation = targetNode,
+                    createdAt = Instant.now()
+                )
+                sourceNode.aboutOrganisations = sourceNode.aboutOrganisations + aboutRel
+            }
+        }
+
+        extractedRelationships.sourcedFromRelationships?.forEach { rel ->
+            val sourceNode = idMap[rel.start_node_id] as? Knowledge
+            val targetNode = idMap[rel.end_node_id] as? Article
+            if (sourceNode != null && targetNode != null) {
+                val sourcedFromRel = SourcedFrom(
+                    article = targetNode,
+                    createdAt = Instant.now()
+                )
+                sourceNode.sourcedFrom = sourceNode.sourcedFrom + sourcedFromRel
+            }
+        }
+
+        extractedRelationships.mentionsEventRelationships?.forEach { rel ->
+            val sourceNode = idMap[rel.start_node_id] as? Article
+            val targetNode = idMap[rel.end_node_id] as? Event
+            if (sourceNode != null && targetNode != null) {
+                val mentionsEventRel = MentionsEvent(
+                    event = targetNode,
+                    createdAt = Instant.now()
+                )
+                sourceNode.mentionsEvents = sourceNode.mentionsEvents + mentionsEventRel
+            }
+        }
+
+        extractedRelationships.occuredInRelationships?.forEach { rel ->
+            val sourceNode = idMap[rel.start_node_id] as? Event
+            val targetNode = idMap[rel.end_node_id] as? Location
+            if (sourceNode != null && targetNode != null) {
+                val occuredInRel = OccuredIn(
+                    location = targetNode,
+                    createdAt = Instant.now()
+                )
+                sourceNode.occurredIn = sourceNode.occurredIn + occuredInRel
+            }
+        }
+
+        extractedRelationships.mentionsLocationRelationships?.forEach { rel ->
+            val sourceNode = idMap[rel.start_node_id] as? Article
+            val targetNode = idMap[rel.end_node_id] as? Location
+            if (sourceNode != null && targetNode != null) {
+                val mentionsLocationRel = MentionsLocation(
+                    location = targetNode,
+                    createdAt = Instant.now()
+                )
+                sourceNode.mentionsLocations = sourceNode.mentionsLocations + mentionsLocationRel
+            }
+        }
+
+        extractedRelationships.involvedPersonRelationships?.forEach { rel ->
+            val sourceNode = idMap[rel.start_node_id] as? Event
+            val targetNode = idMap[rel.end_node_id] as? Person
+            if (sourceNode != null && targetNode != null) {
+                val involvedPersonRel = InvolvedPerson(
+                    person = targetNode,
+                    createdAt = Instant.now()
+                )
+                sourceNode.involvedPeople = sourceNode.involvedPeople + involvedPersonRel
+            }
+        }
+
+        extractedRelationships.involvedOrganisationRelationships?.forEach { rel ->
+            val sourceNode = idMap[rel.start_node_id] as? Event
+            val targetNode = idMap[rel.end_node_id] as? Organisation
+            if (sourceNode != null && targetNode != null) {
+                val involvedOrganisationRel = InvolvedOrganisation(
+                    organisation = targetNode,
+                    createdAt = Instant.now()
+                )
+                sourceNode.involvedOrganisations = sourceNode.involvedOrganisations + involvedOrganisationRel
+            }
+        }
 
         idMap.values.forEach { node ->
             when (node) {
@@ -117,6 +231,8 @@ class KnowledgeGraphService(
                 is Organisation -> organisationRepository.save(node)
                 is Location -> locationRepository.save(node)
                 is Article -> articleRepository.save(node)
+                is Knowledge -> knowledgeRepository.save(node)
+                is Event -> eventRepository.save(node)
             }
         }
     }

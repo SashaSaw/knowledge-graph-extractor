@@ -19,7 +19,6 @@ val article1 = ArticleNode(
     url = "https://www.tribalfootball.com/article/soccer-premier-league-villa-signing-rashford-loses-three-sponsorship-deals-6d925766-53e5-42b5-a1e2-357f9159d385",
     content = """
         Forward Marcus Rashford has lost sponsorship deals with three major brands in recent years as his struggles at Manchester United continued.
-        
         His dip in form saw him miss out on England’s Euro 2024 squad and led to a January loan move to Aston Villa.
         
         During this period, he reportedly parted ways with Burberry, Levi’s, and Beats, which had backed him at the peak of his popularity.
@@ -133,7 +132,7 @@ class KnowledgeGraphExtractorAgent(private val knowledgeGraphService: KnowledgeG
         - Example: Marcus Rashford, Erik ten Hag
 
         #### 2. Organisation
-        Represents any company, team, government body, or media outlet.
+        Represents any company, sports team, government body, or media outlet.
         - Fields: name, dateFounded, description
         - Example: Manchester United, Aston Villa, Nike, The Mail
 
@@ -159,8 +158,9 @@ class KnowledgeGraphExtractorAgent(private val knowledgeGraphService: KnowledgeG
 
         ### INSTRUCTIONS
 
-        1. Identify all possible nodes in the article text (People, Organisations, Locations, Events, Knowledge, Article).  
-        2. Do not create duplicate nodes (e.g., "Manchester United" and "Man United" should be treated as the same).  
+        1. Identify all possible nodes in the article text (People, Organisations, Locations, Events, Knowledge, Article).
+        2. Please only fill properties based off information in the article. If information is not in the article to support a property then it must be null.
+        3. Do not create duplicate nodes (e.g., "Manchester United" and "Man United" should be treated as the same and try to use the most clear name).  
         3.  **Be Exhaustive:** Analyze the article text carefully. Create as many Nodes as you can possibly find evidence for.
         ### ARTICLE
         
@@ -170,107 +170,76 @@ class KnowledgeGraphExtractorAgent(private val knowledgeGraphService: KnowledgeG
 
         val mockExtractedNodes = ExtractedNodes(
             article = ArticleNode(
-                id = "5ca850d7-f7b6-42d0-b121-800478f309a9",
-                title = "Villa signing Rashford loses three sponsorship deals",
-                url = "",
-                content = """
-            Forward Marcus Rashford has lost sponsorship deals with three major brands in recent years as his struggles at Manchester United continued.
-            His dip in form saw him miss out on England’s Euro 2024 squad and led to a January loan move to Aston Villa.
-            During this period, he reportedly parted ways with Burberry, Levi’s, and Beats, which had backed him at the peak of his popularity.
-            Per The Mail, his switch to Villa could further impact his sponsorship earnings, particularly with Nike.
-            United were in Nike’s top-tier category, but Villa are in a lower band, meaning a potential 50% reduction in his earnings.
-            With fewer goals and appearances already affecting his income, Rashford’s move may prove costly beyond the pitch.
-        """.trimIndent(),
+                id = "9fb38238-ab30-4489-b75a-2b084d15d9cd",
+                title = "Another huge scandal, Marcus Rashford will pay for this after his indiscipline",
+                url = "[provided_url]",
+                content = "Marcus Rashford earns a lot of money at Manchester United (382,000 euros a week), but the striker is not happy. He has been feuding with Erik Ten Hag for months and his role on the team has become residual. Annoyed by the desperate months he is going through, the footballer went out partying on Thursday and Friday. And on Sunday he was left out of the call.\n\nManchester United just leads in the FA Cup at halftime against Newport County.\nIn addition to the sporting punishment, Rashford faces, according to 'The Sun', a financial fine of 750,000 euros (which is equivalent to two weeks' salary), an amount that, although it is not money for him, for most mortals it is a huge figure. Last November, Ten Hag already criticized Rashford for partying after losing 3-0 to his archrival, Manchester City.\n\nManchester United striker Marcus Rashford once again made headlines when he was spotted at a Belfast nightclub on Thursday, hours before missing team training, citing illness. This episode marks the second time he was seen there before reporting his inability to attend training on Friday, despite previously being seen in Northern Ireland on Wednesday.\nImages spread on social media suggest that Rashford entered Thompsons Garage nightclub on Wednesday night. Sources close to the footballer indicate that he was having dinner, providing details to the chronology of events. Although he returned to Manchester on Friday morning, he was absent from training due to his health condition, as reported by Mail Sport.\nContradicting the initial version, The Athletic presents footage showing Rashford at a club in the country's capital hours before his supposed meeting in Carrington. Erik ten Hag, Manchester United coach, confirmed the English international's absence due to illness in a press conference prior to the FA Cup match against Newport County. During his trip, Rashford visited the Larne team's training ground, where his former teammate Roshaun Williams now plays. Although Thursday was scheduled as a day off for the players, reports indicate that Rashford was nowhere near United's training complex the night before, attending Lavery's Bar on Wednesday and Thompsons Garage nightclub on Thursday.",
                 language = "en",
-                summary = "Marcus Rashford's move from Manchester United to Aston Villa has led to the loss of three sponsorship deals with major brands.",
-                publishDateTime = LocalDateTime.of(2025, 11, 5, 0, 0),
-                scrapeDateTime = null,
-                agentProcessId = "",
-                sentiment = ""
+                summary = "Marcus Rashford faces financial penalty and missing training due to partying in Belfast nightclub.",
+                publishDateTime = LocalDateTime.parse("2025-11-06T12:34:56"),
+                scrapeDateTime = LocalDateTime.parse("2025-11-06T13:00:00"),
+                agentProcessId = null,
+                sentiment = "negative"
             ),
-
             people = listOf(
                 PersonNode(
-                    id = "89f71ccf-016c-44af-b429-37551efa7708",
-                    name = "Marcus Rashford MBE",
-                    nicknames = emptyList(),
-                    dob = LocalDate.of(1992, 6, 11),
-                    nationalities = listOf("England", "Scottish"),
-                    height = 185,
-                    weight = 78,
-                    gender = "Male",
-                    occupations = listOf("Professional Footballer")
+                    id = "4d25c0a9-d8a9-4151-a872-acd4ccfbbb29",
+                    name = "Marcus Rashford",
+                    nicknames = listOf("Rash", "Mars"),
+                    occupations = listOf("footballer")
                 )
             ),
-
             organisations = listOf(
-                OrganisationNode(
-                    id = "6b3d2d69-a70a-49f9-98ce-85e055f6c2bc",
-                    name = "Burberry",
-                    dateFounded = null,
-                    description = "Major British fashion and lifestyle retailer known for clothing and accessories."
-                ),
-                OrganisationNode(
-                    id = "a1025de8-2db5-4f5a-bf19-b004f6b2bc20",
-                    name = "Levi's",
-                    dateFounded = null,
-                    description = "British sportswear company founded in 1924, specializing in athletic apparel."
-                ),
-                OrganisationNode(
-                    id = "8cfc6f54-513d-4bf8-8f0b-1d0d712dfb06",
-                    name = "Beats",
-                    dateFounded = null,
-                    description = "Swiss audio company known for headphones and speakers."
-                )
+                OrganisationNode(id = "12ce8487-dfa7-4baf-9c43-327b7b198b8b", name = "Manchester United"),
+                OrganisationNode(id = "e328bd9b-170a-48d6-8263-5b762031b6f8", name = "Larne"),
+                OrganisationNode(id = "e4e3dd9a-5df5-4dd7-90a7-6e7c942788af", name = "Thompsons Garage"),
+                OrganisationNode(id = "7ef30b23-ce49-46e9-bcc2-3c023d4a2230", name = "The Athletic")
             ),
-
             knowledge = listOf(
                 KnowledgeNode(
-                    id = "61d331ef-8be5-418b-bd73-f5ca3ce2d210",
-                    fact = "Marcus Rashford earns €382,000 per week.",
-                    category = "Financial",
-                    dateOfFact = LocalDate.of(2025, 11, 5)
+                    id = "34ecf13f-faa2-46e0-a7e7-aec1abe27ff0",
+                    fact = "\"Rashford earns €382,000 per week\"",
+                    category = "salary",
+                    dateOfFact = LocalDate.parse("2025-11-06")
                 ),
                 KnowledgeNode(
-                    id = "7d321324-0675-4597-91ee-7533c8e41741",
-                    fact = "Rashford fined €750,000 for undisclosed contract breaches.",
-                    category = "Financial",
-                    dateOfFact = LocalDate.of(2025, 11, 5)
+                    id = "3000b399-23e1-4df6-ae8e-280f7358beed",
+                    fact = "\"Rashford fined €750,000\"",
+                    category = "financial penalty",
+                    dateOfFact = LocalDate.parse("2025-11-06")
                 )
             ),
-
-            locations = emptyList(),
-
+            locations = listOf(
+                LocationNode(
+                    id = "8fa78622-8a47-4567-8a9a-2d29b6130443",
+                    name = "Belfast",
+                    city = "Manchester",
+                    country = "United Kingdom"
+                )
+            ),
             events = listOf(
                 EventNode(
-                    id = "be6fb98c-5c30-4f97-97d5-e345b286fbde",
-                    description = "Rashford Disciplinary Incident: Marcus Rashford misses England Euro 2024 squad due to struggles at Manchester United.",
-                    startDate = null,
-                    startTime = null,
-                    endDate = null,
-                    endTime = null,
-                    category = "Disciplinary Incident",
-                    status = "",
-                    outcome = "",
-                    impact = ""
+                    id = "4861c163-8aac-4f72-a5e6-53eca0f2f477",
+                    description = "Rashford Disciplinary Incident",
+                    startDate = LocalDate.parse("2025-11-06"),
+                    endDate = LocalDate.parse("2025-11-07"),
+                    category = "disciplinary",
+                    status = "ongoing",
+                    outcome = "fine and training ban"
                 ),
                 EventNode(
-                    id = "b45c88ea-8d54-4a24-a81c-903815d4f966",
-                    description = "Rashford loan move to Aston Villa in January 2025.",
-                    startDate = null,
-                    startTime = null,
-                    endDate = null,
-                    endTime = null,
-                    category = "Transfer",
-                    status = null,
-                    outcome = "",
-                    impact = ""
+                    id = "3cb5e3c3-1695-4f94-9796-5bf1e3fbc777",
+                    description = "FA Cup Match vs Newport County",
+                    startDate = LocalDate.parse("2025-11-05"),
+                    endDate = LocalDate.parse("2025-11-06"),
+                    category = "football",
+                    status = "completed"
                 )
             )
         )
-
-        //val nodes = context.ai().withDefaultLlm().createObject(prompt, ExtractedNodes::class.java)
         return mockExtractedNodes
+
+//        val nodes = context.ai().withDefaultLlm().createObject(prompt, ExtractedNodes::class.java)
 //        return nodes.copy(
 //            article = nodes.article.copy(id = UUID.randomUUID().toString()),
 //            people = nodes.people?.map { it.copy(id = UUID.randomUUID().toString()) },
@@ -301,32 +270,77 @@ Content: ${nodes.article.content}
 ---
 
 ### NODES (use these exact ids)
-Article:
+The Article Node:
   - id: ${nodes.article.id}
   - title: ${nodes.article.title}
   - content: ${nodes.article.content}
 
-People:
+Person Nodes:
 ${nodes.people?.joinToString("\n") { "  - id: ${it.id}\n    name: ${it.name}" } ?: "  []"}
 
-Organisations:
+Organisation Nodes:
 ${nodes.organisations?.joinToString("\n") { "  - id: ${it.id}\n    name: ${it.name}" } ?: "  []"}
 
-Knowledge:
+Knowledge Nodes:
 ${nodes.knowledge?.joinToString("\n") { "  - id: ${it.id}\n    fact: ${it.fact}" } ?: "  []"}
 
-Locations:
+Location Nodes:
 ${nodes.locations?.joinToString("\n") { "  - id: ${it.id}\n    name: ${it.name}" } ?: "  []"}
 
-Events:
+Event Nodes:
 ${nodes.events?.joinToString("\n") { "  - id: ${it.id}\n    description: ${it.description}" } ?: "  []"}
 
 ---
 
 ### RELATIONSHIP TYPES
-MentionsRelationship:
+MentionsPersonRelationship:
 - Start_node_id MUST come from an Article node
 - End_node_id MUST come from a Person node
+
+
+AboutPersonRelationship:
+- Start_node_id MUST come from a Knowledge node
+- End_node_id MUST come from a Person node
+
+
+InvolvedPersonRelationship:
+- Start_node_id MUST come from an Event node
+- End_node_id MUST come from a Person node
+
+
+MentionsOrganisationRelationship:
+- Start_node_id MUST come from an Article node
+- End_node_id MUST come from a Organisation node
+
+
+AboutOrganisationRelationship:
+- Start_node_id MUST come from a Knowledge node
+- End_node_id MUST come from a Organisation node
+
+
+InvolvedOrganisationRelationship:
+- Start_node_id MUST come from an Event node
+- End_node_id MUST come from a Organisation node
+
+
+SourcedFromRelationship:
+- Start_node_id MUST come from an Knowledge node
+- End_node_id MUST come from an Article node
+
+
+MentionsEventRelationship:
+- Start_node_id MUST come from an Article node
+- End_node_id MUST come from an Event node
+
+
+OccuredInRelationship:
+- Start_node_id MUST come from an Event node
+- End_node_id MUST come from a Location node
+
+
+MentionsLocationRelationship:
+- Start_node_id MUST come from an Article node
+- End_node_id MUST come from an Location node
 
 ---
 
@@ -334,9 +348,93 @@ Please also include clear reasoning for why you have or have not created any rel
 
 Now produce the JSON output.
 """.trimIndent()
-        return context.ai()
-            .withDefaultLlm()
-            .createObject(prompt, ExtractedRelationships::class.java)
+        val mockExtractedRelationships = ExtractedRelationships(
+            mentionsPersonReltionships = listOf(
+                MentionsPersonRelationship(
+                    start_node_id = "9fb38238-ab30-4489-b75a-2b084d15d9cd",
+                    end_node_id = "4d25c0a9-d8a9-4151-a872-acd4ccfbbb29",
+                    evidence = "because I said so"
+                )
+            ),
+            aboutPersonRelationships = listOf(
+                AboutPersonRelationship(
+                    start_node_id = "34ecf13f-faa2-46e0-a7e7-aec1abe27ff0",
+                    end_node_id = "4d25c0a9-d8a9-4151-a872-acd4ccfbbb29"
+                ),
+                AboutPersonRelationship(
+                    start_node_id = "3000b399-23e1-4df6-ae8e-280f7358beed",
+                    end_node_id = "4d25c0a9-d8a9-4151-a872-acd4ccfbbb29"
+                )
+            ),
+            involvedPersonRelationships = listOf(
+                InvolvedPersonRelationship(
+                    start_node_id = "4861c163-8aac-4f72-a5e6-53eca0f2f477",
+                    end_node_id = "4d25c0a9-d8a9-4151-a872-acd4ccfbbb29"
+                )
+            ),
+            mentionsOrganisationRelationships = listOf(
+                MentionsOrganisationRelationship(
+                    start_node_id = "9fb38238-ab30-4489-b75a-2b084d15d9cd",
+                    end_node_id = "12ce8487-dfa7-4baf-9c43-327b7b198b8b"
+                ),
+                MentionsOrganisationRelationship(
+                    start_node_id = "9fb38238-ab30-4489-b75a-2b084d15d9cd",
+                    end_node_id = "e328bd9b-170a-48d6-8263-5b762031b6f8"
+                ),
+                MentionsOrganisationRelationship(
+                    start_node_id = "e4e3dd9a-5df5-4dd7-90a7-6e7c942788af",
+                    end_node_id = "12ce8487-dfa7-4baf-9c43-327b7b198b8b"
+                ),
+                MentionsOrganisationRelationship(
+                    start_node_id = "e4e3dd9a-5df5-4dd7-90a7-6e7c942788af",
+                    end_node_id = "7ef30b23-ce49-46e9-bcc2-3c023d4a2230"
+                ),
+            ),
+            aboutOrganisationRelationships = listOf(
+                AboutOrganisationRelationship(
+                    start_node_id = "3000b399-23e1-4df6-ae8e-280f7358beed",
+                    end_node_id = "12ce8487-dfa7-4baf-9c43-327b7b198b8b"
+                )
+            ),
+            involvedOrganisationRelationships = listOf(
+                InvolvedOrganisationRelationship(
+                    start_node_id = "3cb5e3c3-1695-4f94-9796-5bf1e3fbc777",
+                    end_node_id = "12ce8487-dfa7-4baf-9c43-327b7b198b8b",
+                )
+            ),
+            sourcedFromRelationships = listOf(
+                SourcedFromRelationship(
+                    start_node_id = "34ecf13f-faa2-46e0-a7e7-aec1abe27ff0",
+                    end_node_id = "9fb38238-ab30-4489-b75a-2b084d15d9cd"
+                ),
+                SourcedFromRelationship(
+                    start_node_id = "3000b399-23e1-4df6-ae8e-280f7358beed",
+                    end_node_id = "9fb38238-ab30-4489-b75a-2b084d15d9cd"
+                )
+            ),
+            mentionsEventRelationships = listOf(
+                MentionsEventRelationship(
+                    start_node_id = "9fb38238-ab30-4489-b75a-2b084d15d9cd",
+                    end_node_id = "4861c163-8aac-4f72-a5e6-53eca0f2f477"
+                ),
+                MentionsEventRelationship(
+                    start_node_id = "9fb38238-ab30-4489-b75a-2b084d15d9cd",
+                    end_node_id = "3cb5e3c3-1695-4f94-9796-5bf1e3fbc777"
+                )
+            ),
+            occuredInRelationships = listOf(
+                OccuredInRelationship(
+                    start_node_id = "4861c163-8aac-4f72-a5e6-53eca0f2f477",
+                    end_node_id = "8fa78622-8a47-4567-8a9a-2d29b6130443"
+                ),
+            ),
+            mentionsLocationRelationships = null,
+            reasoning = "Mock relationships generated from the Rashford article example, connecting article, people, organisations, knowledge, and events per schema direction."
+        )
+        return mockExtractedRelationships
+//        return context.ai()
+//            .withDefaultLlm()
+//            .createObject(prompt, ExtractedRelationships::class.java)
     }
 
     @AchievesGoal(description = "Nodes and relationships have been extracted from the article and saved to the knowledge graph")
