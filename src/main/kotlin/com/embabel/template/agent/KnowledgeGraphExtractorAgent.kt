@@ -10,9 +10,38 @@ import com.embabel.common.ai.model.LlmOptions
 import com.embabel.template.service.KnowledgeGraphService
 import org.springframework.context.annotation.Profile
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
+
+data class FormattedExtraction(
+    val nodes: ExtractedNodes,
+    val relationships: ExtractedRelationships
+) {
+    override fun toString(): String {
+        return """
+        # Extracted Knowledge Graph
+
+        ## Nodes
+        ### Article
+        - ${nodes.article.title}
+
+        ### People
+        ${nodes.people?.joinToString("\n") { "- ${it.first_name} ${it.last_name}" }}
+
+        ### Organisations
+        ${nodes.organisations?.joinToString("\n") { "- ${it.name}" }}
+
+        ### Locations
+        ${nodes.locations?.joinToString("\n") { "- ${it.name}" }}
+
+        ### Events
+        ${nodes.events?.joinToString("\n") { "- ${it.description}" }}
+
+        ### Knowledge
+        ${nodes.knowledge?.joinToString("\n") { "- ${it.fact}" }}
+        """.trimIndent()
+    }
+}
 
 val article1 = ArticleNode(
     id = UUID.randomUUID().toString(),
@@ -242,7 +271,7 @@ class KnowledgeGraphExtractorAgent(private val knowledgeGraphService: KnowledgeG
 //        return mockExtractedNodes
 
 //        val nodes = context.ai().withDefaultLlm().createObject(prompt, ExtractedNodes::class.java)
-        val nodes = context.ai().withLlm(LlmOptions.withAutoLlm().withTemperature(0.7)).createObject(prompt, ExtractedNodes::class.java)
+        val nodes = context.ai().withLlm(LlmOptions.withModel("gpt-oss:20b").withTemperature(0.3)).createObject(prompt, ExtractedNodes::class.java)
         return nodes.copy(
             article = nodes.article.copy(id = UUID.randomUUID().toString()),
             people = nodes.people?.map { it.copy(id = UUID.randomUUID().toString()) },
@@ -432,7 +461,7 @@ Now produce the JSON output.
 //        )
 //        return mockExtractedRelationships
 
-        return context.ai().withLlm(LlmOptions.withAutoLlm().withTemperature(0.7)).createObject(prompt, ExtractedRelationships::class.java)
+        return context.ai().withLlm(LlmOptions.withModel("gpt-oss:20b").withTemperature(0.3)).createObject(prompt, ExtractedRelationships::class.java)
     }
 
     @AchievesGoal(description = "Nodes and relationships have been extracted from the article and saved to the knowledge graph")
