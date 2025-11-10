@@ -17,12 +17,11 @@ package com.embabel.template
 
 import com.embabel.agent.config.annotation.EnableAgents
 import com.embabel.agent.config.annotation.LocalModels
-import com.embabel.agent.config.annotation.LoggingThemes
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 
 @SpringBootApplication
-@EnableAgents//(localModels = [LocalModels.OLLAMA])
+@EnableAgents(localModels = [LocalModels.OLLAMA])
 class HolistaqAgentApplication
 
 fun main(args: Array<String>) {

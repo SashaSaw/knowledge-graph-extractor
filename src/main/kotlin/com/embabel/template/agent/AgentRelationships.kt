@@ -71,6 +71,5 @@ data class ExtractedRelationships(
     val sourcedFromRelationships: List<SourcedFromRelationship>? = null,
     val mentionsEventRelationships: List<MentionsEventRelationship>? = null,
     val occuredInRelationships: List<OccuredInRelationship>? = null,
-    val mentionsLocationRelationships: List<MentionsLocationRelationship>? = null,
-    val reasoning: String
+    val mentionsLocationRelationships: List<MentionsLocationRelationship>? = null
 )

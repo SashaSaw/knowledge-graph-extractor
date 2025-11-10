@@ -6,6 +6,7 @@ import com.embabel.template.agent.ExtractedRelationships
 import com.embabel.template.agent.KnowledgeGraphExtractorAgent
 import com.embabel.template.graph.model.*
 import com.embabel.template.graph.repository.*
+import org.neo4j.driver.Driver
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -13,6 +14,7 @@ import java.time.Instant
 
 @Service
 class KnowledgeGraphService(
+    private val driver: Driver,
     private val personRepository: PersonRepository,
     private val organisationRepository: OrganisationRepository,
     private val locationRepository: LocationRepository,
@@ -22,6 +24,19 @@ class KnowledgeGraphService(
 ) {
     private val logger = LoggerFactory.getLogger(KnowledgeGraphExtractorAgent::class.java)
 
+    // -------------------------------
+    // Neo4j raw query execution
+    // -------------------------------
+    fun runRead(cypher: String, params: Map<String, Any> = emptyMap()): List<Map<String, Any>> {
+        return driver.session().use { session ->
+            val result = session.run(cypher, params)
+            result.list { record -> record.asMap() }
+        }
+    }
+
+    // -------------------------------
+    // Save extracted nodes & relationships
+    // -------------------------------
     @Transactional
     fun saveExtractedData(extractedData: ExtractedNodes, extractedRelationships: ExtractedRelationships) {
         val idMap = mutableMapOf<String, BaseNode>()

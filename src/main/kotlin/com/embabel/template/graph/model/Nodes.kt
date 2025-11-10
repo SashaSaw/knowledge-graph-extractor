@@ -31,7 +31,7 @@ data class Person(
     var mentioned: List<MentionsPerson> = listOf(),
     @Relationship(type = "ABOUT", direction = Relationship.Direction.INCOMING)
     var about: List<AboutPerson> = listOf(),
-    @Relationship(type = "INVOLVED_IN", direction = Relationship.Direction.INCOMING)
+    @Relationship(type = "INVOLVED_IN", direction = Relationship.Direction.OUTGOING)
     var involvedInEvents: List<InvolvedPerson> = listOf()
 ) : BaseNode
 
@@ -46,7 +46,7 @@ data class Organisation(
     var mentioned: List<MentionsOrganisation> = listOf(),
     @Relationship(type = "ABOUT", direction = Relationship.Direction.INCOMING)
     var about: List<AboutOrganisation> = listOf(),
-    @Relationship(type = "INVOLVED_IN", direction = Relationship.Direction.INCOMING)
+    @Relationship(type = "INVOLVED_IN", direction = Relationship.Direction.OUTGOING)
     var involvedInEvents: List<InvolvedOrganisation> = listOf()
 ) : BaseNode
 
@@ -77,9 +77,9 @@ data class Event(
 
     @Relationship(type = "OCCURRED_IN", direction = Relationship.Direction.OUTGOING)
     var occurredIn: List<OccuredIn> = listOf(),
-    @Relationship(type = "INVOLVED_IN", direction = Relationship.Direction.OUTGOING)
+    @Relationship(type = "INVOLVED_IN", direction = Relationship.Direction.INCOMING)
     var involvedPeople: List<InvolvedPerson> = listOf(),
-    @Relationship(type = "INVOLVED_IN", direction = Relationship.Direction.OUTGOING)
+    @Relationship(type = "INVOLVED_IN", direction = Relationship.Direction.INCOMING)
     var involvedOrganisations: List<InvolvedOrganisation> = listOf()
 ) : BaseNode
 
